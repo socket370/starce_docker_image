@@ -1,0 +1,74 @@
+在运行程序之前，需要保证机器上安装了python和docker。（安装docker步骤见第5步）
+1.首先创建一个脚本sh（假设为program_shell.sh），内容为：应用程序要运行的脚本内容。
+
+2.然后将auto_collect文件夹放在任意一个位置。进入/auto_collect/test_start.sh中，设置变量ProgramHome为你的应用程序运行的位置(即脚本sh所在位置)，变量workscript
+设置为存放程序脚本的sh的名称，workshell设置为程序脚本的bash环境变量。应用打包完成后的默认存放目录为auto_collect下的test_collect目录，可以通过
+设置变量collectdir来改变。
+
+
+3.在/auto_collect文件夹下，运行./test_start.sh,运行完毕后，进入你所设置的collectdir文件夹（默认为auto_collect下的test_collect目录），
+运行sudo docker build -t auto_test2 .
+测试sudo docker run --rm -ti auto_test2
+
+4.导出docker 镜像，以便在其他机器上运行：
+sudo docker save --output=/home/unix-lc/auto_test2.tar auto_test2
+cd /home/unix-lc
+sudo chgrp unix-lc auto_test2.tar -R
+sudo chown unix-lc auto_test2.tar -R
+将文件拷贝到另一个安装有docker的主机后：
+运行类似命令展开镜像sudo docker load --input /home/wk/auto_test2.tar
+
+
+5.安装docker：
+1.卸载旧版本
+旧版本的 Docker 称为 docker 或者 docker-engine ，使用以下命令卸载旧版本：
+
+$ sudo apt-get remove docker \
+docker-engine \
+docker.io
+
+2.由于 apt 源使用 HTTPS 以确保软件下载过程中不被篡改。因此，我们首先需要添加使用
+HTTPS 传输的软件包以及 CA 证书。
+
+sudo apt-get update
+
+sudo apt-get install \
+apt-transport-https \
+ca-certificates \
+curl \
+software-properties-common
+
+3.鉴于国内网络问题，强烈建议使用国内源，官方源请在注释中查看。
+为了确认所下载软件包的合法性，需要添加软件源的 GPG 密钥。
+
+curl -fsSL https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu/gpg | sudo apt-key add -
+
+然后，我们需要向 source.list 中添加 Docker 软件源：
+
+sudo add-apt-repository \
+"deb [arch=amd64] https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu \
+$(lsb_release -cs) \
+stable"
+
+4.安装 Docker CE
+更新 apt 软件包缓存，并安装 docker-ce ：
+
+$ sudo apt-get update
+
+$ sudo apt-get install docker-ce
+
+启动 Docker CE
+$ sudo systemctl enable docker
+
+$ sudo systemctl start docker
+
+ubuntu 16.04 appstreamcli 问题：
+Ubuntu 16.04出现：Problem executing scripts APT::Update::Post-Invoke-Success 'if /usr/bin/test -w /var/cache/app-info -a -e /usr/bin/appstreamcli; then appstreamcli refresh > /dev/null; fi'
+在运行sudo apt-get update时出现如上信息，解决方法如下：
+
+sudo pkill -KILL appstreamcli
+
+wget -P /tmp https://launchpad.net/ubuntu/+archive/primary/+files/appstream_0.9.4-1ubuntu1_amd64.deb https://launchpad.net/ubuntu/+archive/primary/+files/libappstream3_0.9.4-1ubuntu1_amd64.deb
+
+sudo dpkg -i /tmp/appstream_0.9.4-1ubuntu1_amd64.deb /tmp/libappstream3_0.9.4-1ubuntu1_amd64.deb
+执行完上述命令之后再次运行sudo apt-get update就不会再出现上面的错误。

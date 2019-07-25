@@ -1,0 +1,10 @@
+inotify_add_watch
+statfs
+stat
+getpeername
+openat
+access
+chmod
+lstat
+execve
+connect
